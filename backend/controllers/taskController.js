@@ -13,6 +13,7 @@ exports.createTask = async (req, res) => {
   try {
     const task = new Task({
       title: req.body.title,
+      dueDate: req.body.dueDate, 
     });
     const savedTask = await task.save();
     res.status(201).json(savedTask);
@@ -34,7 +35,7 @@ exports.updateTask = async (req, res) => {
   try {
     const task = await Task.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      req.body, 
       { new: true },
     );
     res.json(task);
