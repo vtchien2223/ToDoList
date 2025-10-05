@@ -1,45 +1,87 @@
-const Task = require('../models/Task');
+const Task = require("../models/Task");
 
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit;
+    const tasks = await Task.find({ user: userId })
+      .sort({ completed: 1, createdAt: -1 }) 
+      .skip(skip)
+      .limit(limit);
+    const totalTasks = await Task.countDocuments({ user: userId });
+
+    res.json({
+      tasks,
+      totalPages: Math.ceil(totalTasks / limit),
+      currentPage: page,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
+
 
 exports.createTask = async (req, res) => {
   try {
-    const task = new Task({
-      title: req.body.title,
-      dueDate: req.body.dueDate, 
-    });
-    const savedTask = await task.save();
-    res.status(201).json(savedTask);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+    const { title, dueDate } = req.body;
 
-exports.deleteTask = async (req, res) => {
-  try {
-    const task = await Task.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Task deleted', task });
+    if (!title) {
+      return res.status(400).json({ message: "Thiếu tiêu đề task" });
+    }
+
+    const newTask = await Task.create({
+      title,
+      dueDate,
+      user: req.user.id, 
+    });
+
+    res.status(201).json(newTask);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Lỗi tạo task:", error);
+    res.status(500).json({ message: "Lỗi server khi tạo task" });
   }
 };
 
 exports.updateTask = async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      req.body, 
-      { new: true },
+    const { id } = req.params;
+    const { title, completed, dueDate } = req.body;
+
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: id, user: req.user.id }, 
+      { title, completed, dueDate },
+      { new: true }
     );
-    res.json(task);
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task không tồn tại hoặc không thuộc user" });
+    }
+
+    res.json(updatedTask);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Lỗi cập nhật task:", error);
+    res.status(500).json({ message: "Lỗi server khi cập nhật task" });
+  }
+};
+
+exports.deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedTask = await Task.findOneAndDelete({
+      _id: id,
+      user: req.user.id,
+    });
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: "Task không tồn tại hoặc không thuộc user" });
+    }
+
+    res.json({ message: "Xóa task thành công!" });
+  } catch (error) {
+    console.error("Lỗi xóa task:", error);
+    res.status(500).json({ message: "Lỗi server khi xóa task" });
   }
 };

@@ -2,10 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import "mdb-react-ui-kit/dist/css/mdb.min.css";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; 
+ 
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
+  <GoogleOAuthProvider clientId={clientId}>
     <App />
-  </React.StrictMode>
+  </GoogleOAuthProvider>
 );
