@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require("./routes/authRoutes");
+const groupRoutes = require("./routes/groupRoutes");
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,8 @@ app.use(express.json());
 // Routes
 app.use('/api/tasks', taskRoutes);
 app.use("/api/auth", authRoutes);
+
+app.use("/api/wetodo", groupRoutes);
 
 // Khởi động server
 const PORT = process.env.PORT || 5000;

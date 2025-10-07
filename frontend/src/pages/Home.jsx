@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MyTodos from "../components/MyTodos";
+import WeTodoList from "../components/WeTodoList";
 import {
   MDBContainer,
   MDBRow,
@@ -83,11 +84,7 @@ export default function Home() {
         </MDBCol>
         <MDBCol md="9" lg="10">
           {activeTab === "mytodo" && <MyTodos />}
-          {activeTab === "wetodo" && (
-            <div className="text-center py-5">
-              <h4>WeTodo - Coming soon!</h4>
-            </div>
-          )}
+          {activeTab === "wetodo" && <WeTodoList/>}
         </MDBCol>
       </MDBRow>
     </MDBContainer>
